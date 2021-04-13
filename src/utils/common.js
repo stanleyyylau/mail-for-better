@@ -1,0 +1,63 @@
+import http from './httpRequest'
+
+export const replaceOwnedByWithName = async(list) => {
+    const res = await http({
+        url: http.adornUrl('/sys/user/list'),
+        method: 'get',
+        params: http.adornParams({
+          'page': 1,
+          'limit': 99999,
+        })
+      })
+    const users = res.data.page.list
+    return list.map(item => ({
+        ...item,
+        ownedBy: users.filter(user => user.userId === item.ownedBy)[0] ? users.filter(user => user.userId === item.ownedBy)[0].username : ''
+      }))
+}
+
+export const replaceTagIdWithName = async(list) => {
+    const res = await http({
+        url: http.adornUrl('/generator/m4gtags/list'),
+        method: 'get',
+        params: http.adornParams({
+          'page': 1,
+          'limit': 99999,
+        })
+      })
+    const tags = res.data.page.list
+    return list.map(item => ({
+        ...item,
+        tagId: tags.filter(tag => tag.id === item.tagId)[0] ? tags.filter(tag => tag.id === item.tagId)[0].tag : ''
+      }))
+}
+
+export const fetchTagOptionsData = async() => {
+    const res = await http({
+        url: http.adornUrl('/generator/m4gtags/list'),
+        method: 'get',
+        params: http.adornParams({
+          'page': 1,
+          'limit': 99999,
+        })
+      })
+    const tags = res.data.page.list
+    return tags.map(tag => ({
+        label: tag.tag,
+        value: tag.id
+    }))
+}
+
+export const campaignStatusMap = (list) => {
+    const statusmap = {
+        1: "未发送",
+        2: "已定时",
+        3: "正在发送",
+        4: "发送完成",
+        5: "已取消"
+    }
+    return list.map(item => ({
+        ...item,
+        status: statusmap[item.status]
+    }))
+}
