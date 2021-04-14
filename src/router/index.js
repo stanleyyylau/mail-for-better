@@ -37,7 +37,8 @@ const mainRoutes = {
     { path: '/theme', component: _import('common/theme'), name: 'theme', meta: { title: '主题' } },
     { path: '/demo-echarts', component: _import('demo/echarts'), name: 'demo-echarts', meta: { title: 'demo-echarts', isTab: true } },
     { path: '/demo-ueditor', component: _import('demo/ueditor'), name: 'demo-ueditor', meta: { title: 'demo-ueditor', isTab: true } },
-    { path: '/import-client', component: _import('m4g/client-import'), name: 'client-import', meta: { title: '导入客户', isTab: true } }
+    { path: '/import-client', component: _import('m4g/client-import'), name: 'client-import', meta: { title: '导入客户', isTab: true } },
+    { path: '/campaign-stats', component: _import('m4g/campaign-stats'), name: 'campaign-stats', meta: { title: 'campaign 发送统计', isTab: true } }
   ],
   beforeEnter (to, from, next) {
     let token = Vue.cookie.get('token')

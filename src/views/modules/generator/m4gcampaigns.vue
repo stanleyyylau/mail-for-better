@@ -111,7 +111,7 @@
           <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">{{scope.row.status === '发送完成' ? '查看' : '修改'}}</el-button>
           <el-button :disabled="scope.row.status === '发送完成'" type="text" size="small" @click="deleteHandle(scope.row.id)">删除</el-button>
           <el-button v-show="scope.row.status === '未发送'" type="text" size="small" @click="deleteSendCampaign(scope.row.id)">发送</el-button>
-          <el-button v-show="scope.row.status === '发送完成'" type="text" size="small" @click="global.alert('feature in development')">数据</el-button>
+          <el-button v-show="scope.row.status === '发送完成'" type="text" size="small" @click="goToCampStats(scope.row.id)">数据</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -156,6 +156,14 @@
       this.getDataList()
     },
     methods: {
+      goToCampStats(campId) {
+        this.$router.push({
+          name: "campaign-stats",
+          query: {
+            id: campId
+          }
+        })
+      },
       // 获取数据列表
       getDataList () {
         this.dataListLoading = true
