@@ -29,7 +29,21 @@
         <el-input v-model="dataForm.subject" placeholder="邮箱标题"></el-input>
       </el-form-item>
       <el-form-item label="发件人" prop="fromEmail">
-        <el-input v-model="dataForm.fromEmail" placeholder="发件人"></el-input>
+        <div class="sender-row">
+          <div class="prefix">
+            <el-input v-model="dataForm.fromEmail" placeholder="发件人"></el-input>
+          </div>
+          <div class="postfix">
+            <el-select v-model="dataForm.emailOption" placeholder="选择邮箱后缀">
+              <el-option
+                v-for="item in emailOptions"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </div>
+        </div>
       </el-form-item>
       <el-form-item label="邮箱正文" prop="body">
         <div ref="edit">
@@ -80,10 +94,18 @@
           id: 0,
           subject: '',
           body: '',
+          emailOption: '@aixin-tech.com',
           fromEmail: '',
           templateId: '',
           tagId: ''
         },
+        emailOptions: [{
+          label: '@aixin-tech.com',
+          value: '@aixin-tech.com'
+        }, {
+          label: '@aixinetech.com',
+          value: '@aixinetech.com'
+        }],
         tagOptions: [],
         templateData: [],
         dataRule: {
@@ -175,7 +197,8 @@
               if (data && data.code === 0) {
                 this.dataForm.subject = data.m4gCampaigns.subject
                 this.dataForm.body = data.m4gCampaigns.body
-                this.dataForm.fromEmail = data.m4gCampaigns.fromEmail
+                this.dataForm.fromEmail = data.m4gCampaigns.fromEmail.split('@')[0]
+                this.dataForm.emailOption = `@${data.m4gCampaigns.fromEmail.split('@')[1]}`
                 this.dataForm.tagId = data.m4gCampaigns.tagId
                 this.dataForm.status = data.m4gCampaigns.status
               }
@@ -196,7 +219,7 @@
                 'id': this.dataForm.id || undefined,
                 'subject': this.dataForm.subject,
                 'body': this.dataForm.body,
-                'fromEmail': this.dataForm.fromEmail,
+                'fromEmail': `${this.dataForm.fromEmail}${this.dataForm.emailOption}`,
                 'tagId': this.dataForm.tagId
               })
             }).then(({data}) => {
@@ -220,3 +243,9 @@
     }
   }
 </script>
+<style scoped>
+.sender-row {
+    display: flex;
+    max-width: 300px;
+}
+</style>
