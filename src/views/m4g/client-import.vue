@@ -77,7 +77,8 @@
         var reader = new FileReader();
         reader.onload = function () {
             console.log('data reaa', reader.result)
-            const rows = reader.result.split(/\n/).filter(row => row !== "")
+            const cleanResult = reader.result.replace(/\n"/g, '"')
+            const rows = cleanResult.split(/\n/).filter(row => row !== "")
             rows.shift()
             const parseData = rows.map(row => ({
               email: row.split(',')[0].trim(),
