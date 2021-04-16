@@ -175,7 +175,7 @@
             }
             
         };
-        reader.readAsBinaryString(file.raw);
+        reader.readAsText(file.raw);
 
       },
       importClient: function() {
