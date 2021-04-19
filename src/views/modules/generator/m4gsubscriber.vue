@@ -39,6 +39,7 @@
         <el-button v-if="isAuth('generator:m4gsubscriber:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
         <el-button @click="$router.push({ name: 'client-import' })" type="primary">导入客户</el-button>
         <el-button v-if="isAuth('generator:m4gsubscriber:delete')" type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
+        <el-button :loading="exportLoading"  @click="exportClient" v-if="isAuth('sys:role:save')" type="primary">导出客户</el-button>
       </el-form-item>
     </el-form>
     <el-table
@@ -160,6 +161,7 @@
   export default {
     data () {
       return {
+        exportLoading: false,
         categoryOptions: [],
         tagOptions: [],
         salesOptions: [],
@@ -187,6 +189,41 @@
       this.getSalesOptions()
     },
     methods: {
+      exportClient() {
+        this.exportLoading = true
+        this.$http({
+          url: '/proxyApi/generator/m4gsubscriber/export',
+          method: 'get',
+          responseType: 'blob',
+          params: this.$http.adornParams({
+            'key': this.dataForm.key,
+            'categoryIds': this.category ? this.category : null,
+            'tags': this.tags ? this.tags.join(',') : null,
+            'ownedBy': this.sales
+          })
+        }).then(result => {
+          this.exportLoading = false
+          console.log(result)
+          this.download(result.data, result.headers['content-disposition'].split('filename=')[1])
+        })
+        //window.open("/proxyApi/generator/m4gsubscriber/export", "_blank");  
+      },
+      download(data, filename = "data.csv") {
+      if (!data) {
+          return
+        } 
+        let blob = data;
+        let reader = new FileReader();
+        reader.readAsDataURL(blob);    // base64
+        reader.onload = function (e) {
+          let a = document.createElement('a');
+          a.download = filename;
+          a.href = e.target.result;
+          document.body.appendChild(a)
+          a.click();
+          document.body.removeChild(a)
+        }
+      },
       getSalesOptions () {
         this.$http({
               url: this.$http.adornUrl('/sys/user/list'),
