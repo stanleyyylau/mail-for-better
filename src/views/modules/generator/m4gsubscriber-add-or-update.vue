@@ -20,6 +20,16 @@
         </el-option>
       </el-select>
     </el-form-item>
+    <el-form-item label="多标签" prop="multiTags">
+      <el-select v-model="dataForm.realTags" placeholder="Select" multiple>
+        <el-option
+          v-for="item in multiTagOptions"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+    </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
@@ -34,11 +44,13 @@
     data () {
       return {
         visible: false,
+        multiTagOptions: [],
         dataForm: {
           id: 0,
           email: '',
           name: '',
           tagId: '',
+          realTags: null,
         },
         tagOptions: [],
         dataRule: {
@@ -55,8 +67,27 @@
       }
     },
     methods: {
+      async loadMultiTagOptions () {
+          this.$http({
+              url: this.$http.adornUrl('/generator/m4grealtags/list/'),
+              method: 'get',
+              params: this.$http.adornParams({
+                'page': 1,
+                'limit': 99999,
+              })
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                console.log('data', data)
+                this.multiTagOptions = data.page.list.map(item => ({
+                  label: item.tag,
+                  value: item.id
+                }))
+              }
+            })
+      },
       async init (id) {
         this.dataForm.id = id || 0
+        this.loadMultiTagOptions()
         this.visible = true
         this.$nextTick(() => {
           this.$refs['dataForm'].resetFields()
@@ -70,6 +101,7 @@
                 this.dataForm.email = data.m4gSubscriber.email
                 this.dataForm.name = data.m4gSubscriber.name
                 this.dataForm.tagId = data.m4gSubscriber.tagId
+                this.dataForm.realTags = data.m4gSubscriber.realTags
               }
             })
           }
@@ -89,6 +121,7 @@
                 'email': this.dataForm.email,
                 'name': this.dataForm.name,
                 'tagId': this.dataForm.tagId,
+                'realTags': this.dataForm.realTags
               })
             }).then(({data}) => {
               if (data && data.code === 0) {

@@ -15,16 +15,34 @@
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="选择标签" prop="tagId">
-        <el-select v-model="dataForm.tagId" placeholder="选择客户标签">
-          <el-option
-            v-for="item in tagOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-      </el-form-item>
+      <div class="listRow">
+        <el-form-item label="选择标签" prop="tagId">
+          <el-select v-model="dataForm.tagId" placeholder="选择客户标签">
+            <el-option
+              v-for="item in tagOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="选择多标签" prop="tagIds" label-width="100px">
+          <el-select v-model="dataForm.tagIds" placeholder="选择标签" multiple>
+            <el-option
+              v-for="item in tagsOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <div class="buttonWrap">
+            <el-button :loading="loadingValidEmails" @click="checkValidEmails">查询有效邮箱</el-button>
+        </div>
+        <div v-if="this.validEmailNum !== null" class="validEmailWrap">
+          {{this.validEmailNum}} 个有效邮箱
+        </div>
+      </div>
       <el-form-item label="邮箱标题" prop="subject">
         <el-input v-model="dataForm.subject" placeholder="邮箱标题"></el-input>
       </el-form-item>
@@ -62,6 +80,7 @@
   import ueditor from 'ueditor'
   export default {
     async created () {
+      this.loadMultiTagOptions()
       const templateRes = await this.$http({
           url: this.$http.adornUrl('/generator/m4gtemplates/list'),
           method: 'get',
@@ -90,6 +109,8 @@
         ueId: `J_ueditorBox_${new Date().getTime()}`,
         ueContent: '',
         visible: false,
+        validEmailNum: null,
+        loadingValidEmails: false,
         dataForm: {
           id: 0,
           subject: '',
@@ -97,8 +118,10 @@
           emailOption: '@aixin-tech.com',
           fromEmail: '',
           templateId: '',
-          tagId: ''
+          tagId: '',
+          tagIds: null
         },
+        tagsOptions: [],
         emailOptions: [{
           label: '@aixin-tech.com',
           value: '@aixin-tech.com'
@@ -159,6 +182,41 @@
       }
     },
     methods: {
+      checkValidEmails() {
+        this.loadingValidEmails = true
+          this.$http({
+              url: this.$http.adornUrl('/generator/m4gsubscriber/listbyparam/'),
+              method: 'post',
+              data: {
+                categoryIds: [this.dataForm.tagId],
+                tagIds: this.dataForm.tagIds
+              }
+            }).then(({data}) => {
+              this.loadingValidEmails = false
+              if (data && data.code === 0) {
+                console.log('valid emails data', data)
+                this.validEmailNum = data.data.length
+              }
+            })
+      },
+      async loadMultiTagOptions () {
+          this.$http({
+              url: this.$http.adornUrl('/generator/m4grealtags/list/'),
+              method: 'get',
+              params: this.$http.adornParams({
+                'page': 1,
+                'limit': 99999,
+              })
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                console.log('data', data)
+                this.tagsOptions = data.page.list.map(item => ({
+                  label: item.tag,
+                  value: item.id
+                }))
+              }
+            })
+      },
       loadEditor() {
           self = this
           this.ue = ueditor.getEditor(this.ueId, {
@@ -200,6 +258,7 @@
                 this.dataForm.fromEmail = data.m4gCampaigns.fromEmail.split('@')[0]
                 this.dataForm.emailOption = `@${data.m4gCampaigns.fromEmail.split('@')[1]}`
                 this.dataForm.tagId = data.m4gCampaigns.tagId
+                this.dataForm.tagIds = data.m4gCampaigns.tagIds ? data.m4gCampaigns.tagIds.split(',').map(item => Number(item)) : null
                 this.dataForm.status = data.m4gCampaigns.status
               }
             })
@@ -220,7 +279,8 @@
                 'subject': this.dataForm.subject,
                 'body': this.dataForm.body,
                 'fromEmail': `${this.dataForm.fromEmail}${this.dataForm.emailOption}`,
-                'tagId': this.dataForm.tagId
+                'tagId': this.dataForm.tagId,
+                'tagIds': this.dataForm.tagIds.join(',')
               })
             }).then(({data}) => {
               if (data && data.code === 0) {
@@ -247,5 +307,17 @@
 .sender-row {
     display: flex;
     max-width: 300px;
+}
+.listRow {
+    display: flex;
+    align-items: center;
+}
+.buttonWrap {
+  margin-bottom: 22px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+.validEmailWrap {
+  margin-bottom: 22px;
 }
 </style>

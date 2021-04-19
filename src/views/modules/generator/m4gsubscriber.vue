@@ -5,6 +5,36 @@
         <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
       </el-form-item>
       <el-form-item>
+        <el-select v-model="category" placeholder="选择标签" default-first-option>
+          <el-option
+            v-for="item in categoryOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-select v-model="tags" placeholder="选择多标签" multiple>
+          <el-option
+            v-for="item in tagOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item v-if="isAuth('sys:role:save')">
+        <el-select v-model="sales" placeholder="选择业务员">
+          <el-option
+            v-for="item in salesOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
         <el-button @click="getDataList()">查询</el-button>
         <el-button v-if="isAuth('generator:m4gsubscriber:save')" type="primary" @click="addOrUpdateHandle()">新增</el-button>
         <el-button @click="$router.push({ name: 'client-import' })" type="primary">导入客户</el-button>
@@ -54,6 +84,38 @@
         label="标签">
       </el-table-column>
       <el-table-column
+        header-align="center"
+        align="center"
+        label="多标签">
+        <template slot-scope="scope">
+          <el-tag v-for="item in scope.row.realTags" :key="item">{{item}}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="isBounce"
+        header-align="center"
+        align="center"
+        :filters="[{ text: 'YES', value: 'YES' }, { text: 'NO', value: 'NO' }]"
+        :filter-method="filterTag"
+        label="Bounce">
+      </el-table-column>
+      <el-table-column
+        prop="isComplaint"
+        header-align="center"
+        align="center"
+        :filters="[{ text: 'YES', value: 'YES' }, { text: 'NO', value: 'NO' }]"
+        :filter-method="filterTag"
+        label="Complaint">
+      </el-table-column>
+      <el-table-column
+        prop="isValid"
+        header-align="center"
+        align="center"
+        :filters="[{ text: 'YES', value: 'YES' }, { text: 'NO', value: 'NO' }]"
+        :filter-method="filterTag"
+        label="Valid">
+      </el-table-column>
+      <el-table-column
         prop="createTime"
         header-align="center"
         align="center"
@@ -93,14 +155,20 @@
 
 <script>
   import AddOrUpdate from './m4gsubscriber-add-or-update'
-  import { replaceOwnedByWithName, replaceTagIdWithName } from '../../../utils/common'
+  import { replaceOwnedByWithName, replaceTagIdWithName, replaceMultiTagIdWithName } from '../../../utils/common'
 
   export default {
     data () {
       return {
+        categoryOptions: [],
+        tagOptions: [],
+        salesOptions: [],
         dataForm: {
           key: ''
         },
+        sales: null,
+        tags: null,
+        category: '',
         dataList: [],
         pageIndex: 1,
         pageSize: 10,
@@ -115,22 +183,73 @@
     },
     activated () {
       this.getDataList()
+      this.loadMultiTagOptions()
+      this.getSalesOptions()
     },
     methods: {
+      getSalesOptions () {
+        this.$http({
+              url: this.$http.adornUrl('/sys/user/list'),
+              method: 'get',
+              params: this.$http.adornParams({
+                'page': 1,
+                'limit': 99999,
+              })
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                console.log('data', data)
+                this.salesOptions = [{label: 'ALL', value: null}].concat(data.page.list.map(item => ({
+                  label: item.username,
+                  value: item.userId
+                })))
+              }
+            })
+      },
+      loadMultiTagOptions () {
+          this.$http({
+              url: this.$http.adornUrl('/generator/m4grealtags/list/'),
+              method: 'get',
+              params: this.$http.adornParams({
+                'page': 1,
+                'limit': 99999,
+              })
+            }).then(({data}) => {
+              if (data && data.code === 0) {
+                console.log('data', data)
+                this.tagOptions = data.page.list.map(item => ({
+                  label: item.tag,
+                  value: item.id
+                }))
+              }
+            })
+      },
+      filterTag: (value, row, column)  => {
+        return row[column.property] === value;
+      },
       // 获取数据列表
       getDataList () {
         this.dataListLoading = true
+
         this.$http({
-          url: this.$http.adornUrl('/generator/m4gsubscriber/list'),
+          url: this.$http.adornUrl('/generator/m4gsubscriber/listv2'),
           method: 'get',
           params: this.$http.adornParams({
             'page': this.pageIndex,
             'limit': this.pageSize,
-            'key': this.dataForm.key
+            'key': this.dataForm.key,
+            'categoryIds': this.category ? this.category : null,
+            'tags': this.tags ? this.tags.join(',') : null,
+            'ownedBy': this.sales
           })
         }).then(async ({data}) => {
           if (data && data.code === 0) {
-            this.dataList = await replaceTagIdWithName(await replaceOwnedByWithName(data.page.list))
+            const tempList = await replaceTagIdWithName(await replaceOwnedByWithName(data.page.list))
+            this.dataList = await replaceMultiTagIdWithName(tempList.map(item => ({
+              ...item,
+              isBounce: Boolean(item.isBounce) ? 'YES' : 'NO',
+              isComplaint: Boolean(item.isComplaint) ? 'YES' : 'NO',
+              isValid: Boolean(item.isValid) ? 'YES' : 'NO',
+            })))
             this.totalPage = data.page.totalCount
           } else {
             this.dataList = []
@@ -138,6 +257,28 @@
           }
           this.dataListLoading = false
         })
+        
+        this.$http({
+          url: this.$http.adornUrl('/generator/m4gtags/list'),
+          method: 'get',
+          params: this.$http.adornParams({
+            'page': 1,
+            'limit': 99999,
+          })
+        }).then(async ({data}) => {
+          if (data && data.code === 0) {
+            this.dataList = await replaceOwnedByWithName(data.page.list)
+            this.totalPage = data.page.totalCount
+            this.categoryOptions = [{label: 'ALL', value: null}].concat(data.page.list.map(item => ({
+              label: item.tag,
+              value: item.id
+            })))
+          } else {
+            
+          }
+          this.dataListLoading = false
+        })
+
       },
       // 每页数
       sizeChangeHandle (val) {

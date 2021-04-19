@@ -32,6 +32,24 @@ export const replaceTagIdWithName = async(list) => {
       }))
 }
 
+export const replaceMultiTagIdWithName = async(list) => {
+  const res = await http({
+      url: http.adornUrl('/generator/m4grealtags/list'),
+      method: 'get',
+      params: http.adornParams({
+        'page': 1,
+        'limit': 99999,
+      })
+    })
+  const tags = res.data.page.list
+  return list.map(item => ({
+      ...item,
+      realTags: item.realTags ? item.realTags.map(tagId => {
+        return tags.filter(tag => tag.id === tagId)[0] ? tags.filter(tag => tag.id === tagId)[0].tag : ''
+      }): []
+    }))
+}
+
 export const fetchTagOptionsData = async() => {
     const res = await http({
         url: http.adornUrl('/generator/m4gtags/list'),
