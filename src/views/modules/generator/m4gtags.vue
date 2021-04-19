@@ -32,7 +32,7 @@
         prop="tag"
         header-align="center"
         align="center"
-        label="标签">
+        label="分类">
       </el-table-column>
       <el-table-column
         prop="ownedBy"

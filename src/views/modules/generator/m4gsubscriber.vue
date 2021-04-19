@@ -5,7 +5,7 @@
         <el-input v-model="dataForm.key" placeholder="参数名" clearable></el-input>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="category" placeholder="选择标签" default-first-option>
+        <el-select v-model="category" placeholder="选择分类" default-first-option>
           <el-option
             v-for="item in categoryOptions"
             :key="item.value"
@@ -15,7 +15,7 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-select v-model="tags" placeholder="选择多标签" multiple>
+        <el-select v-model="tags" placeholder="选择标签" multiple>
           <el-option
             v-for="item in tagOptions"
             :key="item.value"
@@ -81,12 +81,12 @@
         prop="tagId"
         header-align="center"
         align="center"
-        label="标签">
+        label="分类">
       </el-table-column>
       <el-table-column
         header-align="center"
         align="center"
-        label="多标签">
+        label="标签">
         <template slot-scope="scope">
           <el-tag v-for="item in scope.row.realTags" :key="item">{{item}}</el-tag>
         </template>

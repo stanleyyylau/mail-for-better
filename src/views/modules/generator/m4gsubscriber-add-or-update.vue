@@ -10,7 +10,7 @@
     <el-form-item label="名字" prop="name">
       <el-input v-model="dataForm.name" placeholder="名字"></el-input>
     </el-form-item>
-    <el-form-item label="标签" prop="tagId">
+    <el-form-item label="分类" prop="tagId">
       <el-select v-model="dataForm.tagId" placeholder="Select">
         <el-option
           v-for="item in tagOptions"
@@ -20,7 +20,7 @@
         </el-option>
       </el-select>
     </el-form-item>
-    <el-form-item label="多标签" prop="multiTags">
+    <el-form-item label="标签" prop="multiTags">
       <el-select v-model="dataForm.realTags" placeholder="Select" multiple>
         <el-option
           v-for="item in multiTagOptions"

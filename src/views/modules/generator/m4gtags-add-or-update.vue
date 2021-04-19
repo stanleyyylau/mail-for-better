@@ -4,8 +4,8 @@
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
-    <el-form-item label="标签" prop="tag">
-      <el-input v-model="dataForm.tag" placeholder="标签"></el-input>
+    <el-form-item label="分类" prop="tag">
+      <el-input v-model="dataForm.tag" placeholder="分类"></el-input>
     </el-form-item>
     <!-- <el-form-item label="所属业务员" prop="ownedBy">
       <el-input v-model="dataForm.ownedBy" placeholder="所属业务员"></el-input>

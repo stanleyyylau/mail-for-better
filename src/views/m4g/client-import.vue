@@ -33,7 +33,7 @@
               </el-table>
             </div>
             <div class="tag-wrap">
-              <el-select v-model="tagId" placeholder="选择标签">
+              <el-select v-model="tagId" placeholder="选择分类">
                 <el-option
                   v-for="item in tagOptions"
                   :key="item.value"

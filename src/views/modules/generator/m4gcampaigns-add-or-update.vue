@@ -16,8 +16,8 @@
         </el-select>
       </el-form-item>
       <div class="listRow">
-        <el-form-item label="选择标签" prop="tagId">
-          <el-select v-model="dataForm.tagId" placeholder="选择客户标签">
+        <el-form-item label="选择分类" prop="tagId">
+          <el-select v-model="dataForm.tagId" placeholder="选择客户分类">
             <el-option
               v-for="item in tagOptions"
               :key="item.value"
@@ -26,8 +26,8 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="选择多标签" prop="tagIds" label-width="100px">
-          <el-select v-model="dataForm.tagIds" placeholder="选择标签" multiple>
+        <el-form-item label="选择标签" prop="tagIds" label-width="100px">
+          <el-select v-model="dataForm.tagIds" placeholder="选择客户标签" multiple>
             <el-option
               v-for="item in tagsOptions"
               :key="item.value"
