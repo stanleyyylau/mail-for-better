@@ -79,3 +79,16 @@ export const campaignStatusMap = (list) => {
         status: statusmap[item.status]
     }))
 }
+
+export const appendIsOwnerField = async (list) => {
+  const res = await http({
+    url: http.adornUrl('/sys/user/info'),
+    method: 'get',
+  })
+  const user = res.data.user
+  console.log('res', user)
+  return list.map(item => ({
+    ...item,
+    isOwner: user.userId === 1 || user.userId === item.ownedBy
+  }))
+}

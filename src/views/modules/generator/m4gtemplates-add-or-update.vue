@@ -26,13 +26,15 @@
     </el-form>
     <span slot="footer" class="dialog-footer">
       <el-button @click="visible = false">取消</el-button>
-      <el-button type="primary" @click="dataFormSubmit()">确定</el-button>
+      <el-button :disabled="!dataForm.isOwner" type="primary" @click="dataFormSubmit()">确定</el-button>
     </span>
   </el-dialog>
 </template>
 
 <script>
   import ueditor from 'ueditor'
+      import { appendIsOwnerField } from '../../../utils/common'
+
   export default {
     mounted () {
       
@@ -73,7 +75,8 @@
           isPublic: false,
           subject: '',
           body: '',
-          orderNum: ''
+          orderNum: '',
+          isOwner: false,
         },
         dataRule: {
           category: [
@@ -126,7 +129,7 @@
               url: this.$http.adornUrl(`/generator/m4gtemplates/info/${this.dataForm.id}`),
               method: 'get',
               params: this.$http.adornParams()
-            }).then(({data}) => {
+            }).then(async ({data}) => {
               if (data && data.code === 0) {
                 this.dataForm.category = data.m4gTemplates.category
                 this.dataForm.ownedBy = data.m4gTemplates.ownedBy
@@ -137,6 +140,9 @@
                 this.dataForm.updateTime = data.m4gTemplates.updateTime
                 this.dataForm.deleteTime = data.m4gTemplates.deleteTime
                 this.dataForm.orderNum = data.m4gTemplates.orderNum
+                const arrayResult = await appendIsOwnerField([this.dataForm])
+                this.dataForm = arrayResult[0]
+                console.log('data form is', this.dataForm)
               }
             })
           }

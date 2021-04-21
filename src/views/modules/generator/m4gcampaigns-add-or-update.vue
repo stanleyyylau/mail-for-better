@@ -82,7 +82,7 @@
     async created () {
       this.loadMultiTagOptions()
       const templateRes = await this.$http({
-          url: this.$http.adornUrl('/generator/m4gtemplates/list'),
+          url: this.$http.adornUrl('/generator/m4gtemplates/listmyandpublic'),
           method: 'get',
           params: this.$http.adornParams({
             'page': 1,
