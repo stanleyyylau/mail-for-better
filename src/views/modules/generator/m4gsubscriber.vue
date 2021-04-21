@@ -204,7 +204,7 @@
         }).then(result => {
           this.exportLoading = false
           console.log(result)
-          this.download(result.data, result.headers['content-disposition'].split('filename=')[1])
+          this.download(result.data, `client-${new Date().getTime()}.csv`)
         })
         //window.open("/proxyApi/generator/m4gsubscriber/export", "_blank");  
       },
