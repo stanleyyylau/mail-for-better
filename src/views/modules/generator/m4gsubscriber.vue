@@ -192,7 +192,7 @@
       exportClient() {
         this.exportLoading = true
         this.$http({
-          url: '/proxyApi/generator/m4gsubscriber/export',
+          url: this.$http.adornUrl('/generator/m4gsubscriber/export'),
           method: 'get',
           responseType: 'blob',
           params: this.$http.adornParams({
