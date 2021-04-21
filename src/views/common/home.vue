@@ -105,7 +105,7 @@ export default {
     async initChart() {
       this.loading = true;
       const res = await this.$http({
-        url: this.$http.adornUrl("generator/m4gcampaigns/stats"),
+        url: this.$http.adornUrl("/generator/m4gcampaigns/stats"),
         method: "get",
         params: this.$http.adornParams({
           id: this.sales,
